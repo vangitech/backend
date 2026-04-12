@@ -6,7 +6,7 @@ const userSchema = new Schema(
     {
         username: {
             type: String,
-            reqiured: true,
+            required: true,
             unique: true,
             lowercase: true,
             trim: true,
@@ -17,7 +17,7 @@ const userSchema = new Schema(
             type: String,
             required: true,
             minLength: 6,
-            maxLength: 50 
+            maxLength: 255
         }, 
         email: {
             type: String,
@@ -27,6 +27,18 @@ const userSchema = new Schema(
             trim: true,
             minLength: 5,
             maxLength: 50
+        },
+        phoneNumber:{
+            type: String,
+            required: false,
+            unique: false,
+            trim: true,
+            minLength: 7,
+            maxLength: 15   
+        },
+        loggedIn: {
+            type: Boolean,
+            default: false
         }
     },
     {
@@ -34,17 +46,10 @@ const userSchema = new Schema(
     }
 )
 // Hash password before saving
-userSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) {
-        return next();
-    }
-    try {
-        const salt = await bcrypt.genSalt(10);
-        this.password = await bcrypt.hash(this.password, salt);
-        next();
-    } catch (error) {
-        next(error);
-    }   
+userSchema.pre('save', async function () {
+    if (!this.isModified('password')) return;
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
 });
 
 // Method to compare password
